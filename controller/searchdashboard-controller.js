@@ -77,7 +77,7 @@ export const searchCriteria = async (request, response) => {
                     fix: cveRecord.fix,
                     osType: inventoryRecord.osType,
                     projectId: inventoryRecord.project, // Include projectId here
-                    project: cveRecord.project
+                    project: inventoryRecord.project
                 });
             } else {
                 console.log("No matching inventory record found. Searching Inventory collection...");
