@@ -31,18 +31,18 @@ export const searchCriteria = async (request, response) => {
             { $limit: options.limit },
             {
                 $lookup: {
-                    from: "inventory",
+                    from: "assets",
                     localField: "partNo",
                     foreignField: "partNo",
                     as: "inventoryDetails"
                 }
             },
-            {
-                $unwind: {
-                    path: "$inventoryDetails",
-                    preserveNullAndEmptyArrays: true
-                }
-            },
+            // {
+            //     $unwind: {
+            //         path: "$inventoryDetails",
+            //         preserveNullAndEmptyArrays: true
+            //     }
+            // },
             {
                 $project: {
                     cveId: 1,
