@@ -5,109 +5,69 @@ import Inventory from '../model/inventorySchema.js';
 
 export const searchCriteria = async (request, response) => {
     try {
-        const { vendorName, cveId, productName, partNo, project, osType, version, firmwareVersion, page = 1, limit = 10 } = request.body;
-        const searchResults = [];
+        const { vendorName, cveId, productName, partNo, project, osType, version, firmwareVersion, page = 1, limit = request.body.pageSize } = request.body;
+        const parsedLimit = parseInt(limit, 10);
         const options = {
             page: parseInt(page, 10),
-            limit: parseInt(limit, request.body.pageSize),
+            limit: parsedLimit,
             sort: { cveId: -1 },
         };
-        const query = {};
 
-        if (cveId && cveId.length > 0) {
-            query.cveId = { $in: cveId };
-        }
+        // Construct the initial match stage
+        const matchStage = {};
+        if (cveId && cveId.length > 0) matchStage.cveId = { $in: cveId };
+        if (vendorName && vendorName.length > 0) matchStage.vendorName = { $in: vendorName };
+        if (productName && productName.length > 0) matchStage.productName = { $in: productName };
+        if (partNo && partNo.length > 0) matchStage.partNo = { $in: partNo };
+        if (firmwareVersion && firmwareVersion.length > 0) matchStage.firmwareVersion = { $in: firmwareVersion };
+        if (version && version.length > 0) matchStage.version = { $in: version };
+        if (project && project.length > 0) matchStage.project = { $in: project };
+        if (osType && osType.length > 0) matchStage.osType = { $in: osType };
 
-        if (vendorName && vendorName.length > 0) {
-            query.vendorName = { $in: vendorName };
-        }
-
-        if (productName && productName.length > 0) {
-            query.productName = { $in: productName };
-        }
-
-        if (partNo && partNo.length > 0) {
-            query.partNo = { $in: partNo }; // Updated to direct match
-        }
-
-        if (firmwareVersion && firmwareVersion.length > 0) {
-            query.firmwareVersion = { $in: firmwareVersion }; // Updated to direct match
-        }
-
-        if (version && version.length > 0) {
-            query.version = { $in: version }; // Updated to direct match
-        }
-
-        if (project && project.length > 0) {
-            query.project = { $in: project }; // Updated to direct match
-        }
-
-        if (osType && osType.length > 0) {
-            query.osType = { $in: osType }; // Updated to direct match
-        }
-
-        const total = await vendorProductCveModel.countDocuments(query);
-        const totalPages = Math.ceil(total / options.limit);
-
-        const result = await vendorProductCveModel.find(query)
-            .sort(options.sort)
-            .skip((options.page - 1) * options.limit)
-            .limit(options.limit);
-
-        for (const cveRecord of result) {
-            const inventoryRecord = await Inventory.findOne({
-                vendor: cveRecord.vendorName,
-                product: cveRecord.productName,
-                partNo: cveRecord.partNo,
-                firmwareVersion: cveRecord.firmwareVersion,
-                project: cveRecord.project,
-                osType: cveRecord.osType
-            });
-
-            if (inventoryRecord) {
-                searchResults.push({
-                    cveId: cveRecord.cveId,
-                    vendorName: cveRecord.vendorName,
-                    productName: cveRecord.productName,
-                    firmwareVersion: inventoryRecord.firmwareVersion,
-                    partNo: inventoryRecord.partNo,
-                    serialNo: inventoryRecord.serialNo,
-                    affectedCve: true,
-                    severity: cveRecord.severity, // Corrected typo
-                    fix: cveRecord.fix,
-                    osType: inventoryRecord.osType,
-                    projectId: inventoryRecord.project, // Include projectId here
-                    project: inventoryRecord.project
-                });
-            } else {
-                console.log("No matching inventory record found. Searching Inventory collection...");
-                let matchedRecords;
-
-                if (query.project) {
-                    matchedRecords = await Inventory.find({ "vendor": cveRecord.vendorName, "partNo": cveRecord.partNo, "project": cveRecord.project, "firmwareVersion": cveRecord.version });
-                } else if (query.osType) {
-                    matchedRecords = await Inventory.find({ "vendor": cveRecord.vendorName, "partNo": cveRecord.partNo, "osType": cveRecord.osType, "firmwareVersion": cveRecord.version });
-                } else {
-                    matchedRecords = await Inventory.find({ "vendor": cveRecord.vendorName, "partNo": cveRecord.partNo, "firmwareVersion": cveRecord.version });
+        const aggregationQuery = [
+            { $match: matchStage },
+            { $sort: options.sort },
+            { $skip: (options.page - 1) * options.limit }, // Adjusted here
+            { $limit: options.limit },
+            {
+                $lookup: {
+                    from: "inventory",
+                    localField: "partNo",
+                    foreignField: "partNo",
+                    as: "inventoryDetails"
                 }
-
-                console.log("Matched records from Inventory collection:", matchedRecords);
-                if (matchedRecords.length > 0) {
-                    matchedRecords.forEach(record => {
-                        searchResults.push({
-                            ...cveRecord.toObject(),
-                            project: record.project
-                        });
-                    });
-                } else {
-                    console.log("No matching records found in Inventory collection for:", cveRecord);
-                    searchResults.push(cveRecord.toObject());
+            },
+            {
+                $unwind: {
+                    path: "$inventoryDetails",
+                    preserveNullAndEmptyArrays: true
+                }
+            },
+            {
+                $project: {
+                    cveId: 1,
+                    vendorName: 1,
+                    productName: 1,
+                    partNo: 1,
+                    version: 1,
+                    firmwareVersion: 1,
+                    inventoryDetails: 1,
+                    project: 1,
+                    osType: 1,
+                     serialNo:1,
+                    seviarity:1,
                 }
             }
-        }
+        ];
+
+        const results = await vendorProductCveModel.aggregate(aggregationQuery);
+
+        // Response object preparation
+        const total = await vendorProductCveModel.countDocuments(matchStage);
+        const totalPages = Math.ceil(total / parsedLimit);
 
         response.json({
-            docs: searchResults,
+            docs: results,
             total,
             totalPages,
             page: options.page,
@@ -117,6 +77,8 @@ export const searchCriteria = async (request, response) => {
         response.status(500).json({ error: error.message });
     }
 };
+
+
 
 export const getOemVendorList = async (request, response) => {
     try {
