@@ -18,7 +18,8 @@ const vendorProductCveSchema = new mongoose.Schema({
     version:String,
     serialNo:String,
     osType:String,
-    project:String
+    project:String,
+    type: String,
 });
 vendorProductCveSchema.plugin(mongoosePaginate);
 

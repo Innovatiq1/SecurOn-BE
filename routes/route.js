@@ -22,7 +22,7 @@ import { RunAssetProductCveMappingScheduler } from '../controller/asset-product-
 import { RunCiscoScraping } from '../controller/cisco-controller.js';
 import { RunCveScheduler } from '../controller/cve-scheduler-controller.js';
 import { getOemVendorList, getProductsByVendor, searchCriteria, getCveDetails } from '../controller/searchdashboard-controller.js';
-import { getCvesByDateRange, getCvesCountByDateRange, getCveDataBySeviarity, getCircularDashboardData, getVulnarabilityTrendData } from '../controller/cvedashboard-controller.js';
+import { getCvesByDateRange, getCvesCountByDateRange, getCveDataBySeviarity, getCircularDashboardData, getVulnarabilityTrendData, getCveDataByBrand, getCveDataByAsset, getCveDataByProject } from '../controller/cvedashboard-controller.js';
 
 const router = express.Router();
 
@@ -85,6 +85,10 @@ router.post('/getCvesCountByDateRange', getCvesCountByDateRange);
 router.post('/getCveDataBySeviarity', getCveDataBySeviarity);
 router.post('/getCircularDashboardData', getCircularDashboardData);
 router.post('/getVulnarabilityTrendData', getVulnarabilityTrendData);
+// router.post('/getCveDataBySeviarity', getCveDataBySeviarity);
+router.post('/getCveDataByBrand', getCveDataByBrand);
+router.post('/getCveDataByAsset', getCveDataByAsset);
+router.post('/getCveDataByProject', getCveDataByProject);
 export default router;
 
 
