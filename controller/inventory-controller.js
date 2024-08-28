@@ -297,48 +297,141 @@ export const uploadAssets = async (req, res, next) => {
 //   }
 // };
 
+// export const updateAsset = async (request, response) => {
+//   try {
+
+//     //console.log("&&&&&&&"+request.body._id);
+
+//     let status = 'I';
+//     if (request.body.status) {
+//       status = 'A';
+//     }
+//     const assets = await Inventory.findOne({
+//       project: request.body.project, vendor: request.body.vendor, partNo: request.body.partNo,
+//       product: request.body.product,
+//       type: request.body.type, serialNo: request.body.serialNo, firmwareVersion: request.body.firmwareVersion,
+//        status: status,osType:request.body.osType
+//     });
+
+//     if (!assets || (assets != null && assets != undefined && assets._id != request.body._id)) {
+
+//       const vendorFilter = { vendorName: request.body.vendor, osType: request.body.osType, project: request.body.project, partNo: request.body.partNo };
+//       const vendorProducts = await vendorProductCveModel.find(vendorFilter); 
+//       console.log('Found vendor', vendorProducts.length)
+//       for (const product of vendorProducts) {
+//         await vendorProductCveModel.findByIdAndUpdate(product._id,
+//           {
+//             project: request.body.project, vendor: request.body.vendor, product: request.body.product, partNo: request.body.partNo,
+//             type: request.body.type, serialNo: request.body.serialNo, firmwareVersion: request.body.firmwareVersion,
+//              status: status,osType:request.body.osType
+//           });
+//       }
+//       await Inventory.findByIdAndUpdate(assets.id,
+//         {
+//           project: request.body.project, vendor: request.body.vendor, product: request.body.product, partNo: request.body.partNo,
+//           type: request.body.type, serialNo: request.body.serialNo, firmwareVersion: request.body.firmwareVersion,
+//            status: status,osType:request.body.osType
+//         });
+//       // await Inventory.findByIdAndUpdate(request.body._id,
+//       //   {
+//       //     project: request.body.project, vendor: request.body.vendor, product: request.body.product, partNo: request.body.partNo,
+//       //     type: request.body.type, serialNo: request.body.serialNo, firmwareVersion: request.body.firmwareVersion,
+//       //      status: status,osType:request.body.osType
+//       //   });
+//       return response.status(201).json({
+//         success: true,
+//         message: " asset updated successfully",
+//       });
+//     } else {
+//       return response.status(201).json({
+//         success: true,
+//         message: " asset already exists with same combination",
+//       });
+
+//     }
+
+
+//   } catch (error) {
+//     return response.status(500).json({
+//       success: true,
+//       message: "Error in updating Asset"
+
+//     });
+//   }
+// }
 export const updateAsset = async (request, response) => {
   try {
+    let status = request.body.status ? 'A' : 'I';
 
-    //console.log("&&&&&&&"+request.body._id);
-
-    let status = 'I';
-    if (request.body.status) {
-      status = 'A';
-    }
-    const assets = await Inventory.findOne({
-      project: request.body.project, vendor: request.body.vendor, partNo: request.body.partNo,
+    // Check if the asset already exists in the Inventory
+    const existingAsset = await Inventory.findOne({
+      project: request.body.project,
+      vendor: request.body.vendor,
+      partNo: request.body.partNo,
       product: request.body.product,
-      type: request.body.type, serialNo: request.body.serialNo, firmwareVersion: request.body.firmwareVersion,
-       status: status,osType:request.body.osType
+      type: request.body.type,
+      serialNo: request.body.serialNo,
+      firmwareVersion: request.body.firmwareVersion,
+      status: status,
+      osType: request.body.osType
     });
 
-    if (!assets || (assets != null && assets != undefined && assets._id != request.body._id)) {
-
-      await Inventory.findByIdAndUpdate(request.body._id,
-        {
-          project: request.body.project, vendor: request.body.vendor, product: request.body.product, partNo: request.body.partNo,
-          type: request.body.type, serialNo: request.body.serialNo, firmwareVersion: request.body.firmwareVersion,
-           status: status,osType:request.body.osType
-        });
-      return response.status(201).json({
-        success: true,
-        message: " asset updated successfully",
+    // If the asset already exists and is not the current asset, return an error message
+    if (existingAsset && existingAsset._id.toString() !== request.body._id) {
+      return response.status(409).json({
+        success: false,
+        message: "Asset already exists with the same combination.",
       });
-    } else {
-      return response.status(201).json({
-        success: true,
-        message: " asset already exists with same combination",
-      });
-
     }
 
+    // Update the vendor product records
+    const vendorFilter = {
+      vendorName: request.body.vendor,
+      osType: request.body.osType,
+      project: request.body.project,
+      partNo: request.body.partNo
+    };
+
+    const vendorProducts = await vendorProductCveModel.find(vendorFilter);
+    console.log('Found vendor products:', vendorProducts.length);
+
+    for (const product of vendorProducts) {
+      await vendorProductCveModel.findByIdAndUpdate(product._id, {
+        project: request.body.project,
+        vendor: request.body.vendor,
+        product: request.body.product,
+        partNo: request.body.partNo,
+        type: request.body.type,
+        serialNo: request.body.serialNo,
+        firmwareVersion: request.body.firmwareVersion,
+        status: status,
+        osType: request.body.osType
+      });
+    }
+
+    // Update the asset in Inventory
+    await Inventory.findByIdAndUpdate(request.body._id, {
+      project: request.body.project,
+      vendor: request.body.vendor,
+      product: request.body.product,
+      partNo: request.body.partNo,
+      type: request.body.type,
+      serialNo: request.body.serialNo,
+      firmwareVersion: request.body.firmwareVersion,
+      status: status,
+      osType: request.body.osType
+    });
+
+    return response.status(200).json({
+      success: true,
+      message: "Asset updated successfully",
+    });
 
   } catch (error) {
+    console.error('Error updating asset:', error);
     return response.status(500).json({
-      success: true,
-      message: "Error in updating Asset"
-
+      success: false,
+      message: "Error in updating Asset",
     });
   }
 }
