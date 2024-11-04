@@ -1,6 +1,6 @@
 import express from 'express';
 import { userSignUp, userLogIn, forgotPassword, resetPassword } from '../controller/user-controller.js';
-import { getAssets, uploadAssets, deleteAssets, updateAsset, fetchProductCves }
+import { getAssets, uploadAssets,createAsset, deleteAssets, updateAsset, fetchProductCves }
   from '../controller/inventory-controller.js';
 import { getCves, searchCve } from '../controller/cve-controller.js';
 import { vendorSearch, listOfProducts, listOfVendorProductsCves } from '../controller/vendor-product-cve-controller.js';
@@ -47,6 +47,8 @@ router.post('/resetPassword', resetPassword);
 router.get('/getAssets', verifyTokenAuth, getAssets);
 router.get('/getCves/:month/:year', verifyTokenAuth, getCves);
 router.post("/uploadAssets", verifyTokenAuth, upload.single("xlsx"), uploadAssets);
+router.post("/createAsset", verifyTokenAuth,createAsset);
+
 router.post('/deleteAssets', verifyTokenAuth, deleteAssets);
 router.post('/fetchcves',  fetchProductCves);
 router.post('/updateAsset', verifyTokenAuth, updateAsset);

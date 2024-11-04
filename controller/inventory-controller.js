@@ -435,3 +435,23 @@ export const updateAsset = async (request, response) => {
     });
   }
 }
+
+
+
+export const createAsset = async (request, response) => {
+  try {
+    req.body.status = request.body.status ? 'A' : 'I';
+    await Inventory.create(request.body);
+    return response.status(200).json({
+      success: true,
+      message: "Asset created successfully",
+    });
+
+  } catch (error) {
+    console.error('Error creating asset:', error);
+    return response.status(500).json({
+      success: false,
+      message: "Error in creating Asset",
+    });
+  }
+}
