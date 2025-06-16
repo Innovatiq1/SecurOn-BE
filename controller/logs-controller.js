@@ -1,6 +1,15 @@
 import LogCve from '../model/logsSchema.js';
 import escapeStringRegexp from 'escape-string-regexp';
 import axios from "axios";
+import mongoose from 'mongoose';
+
+
+// Define a Mongoose schema (optional if you need to process the data further)
+const LogSchema = new mongoose.Schema({}, { strict: false });
+const NistLog = mongoose.model('NistLog', LogSchema, 'nistlogs');
+const SystemLog = mongoose.model('SystemLog', LogSchema, 'systemlogs');
+const UserActivityLog = mongoose.model('UserActivityLog', LogSchema, 'userActivitylogs');
+const SchedulerLog = mongoose.model('SchedulerLog', LogSchema, 'schedulerlogs');
 
 
 export const runlastModifiedScheduler = async (request, response) => {
@@ -168,4 +177,154 @@ export const runlastPublishedScheduler = async (request, response) => {
 
     }
 };
+
+
+export const getNistLogs = async (request, response) => {
+  const { fromDate, toDate } = request.body;
+  const getDateRangeQuery = () => {
+    if (!fromDate && !toDate) {
+      // Get the current date
+      const dateTime = new Date();
+      const year = dateTime.getFullYear();
+      const month = ("0" + (dateTime.getMonth() + 1)).slice(-2);
+      const date = ("0" + dateTime.getDate()).slice(-2);
+
+      // Go back by a duration (e.g., 1 month by default)
+      const duration = 1; // Example: 1 month duration
+      dateTime.setMonth(dateTime.getMonth() - duration);
+
+      const oldYear = dateTime.getFullYear();
+      const oldMonth = ("0" + (dateTime.getMonth() + 1)).slice(-2);
+      const oldDate = ("0" + dateTime.getDate()).slice(-2);
+
+      return {
+        timestamp: { $gte: new Date(`${oldYear}-${oldMonth}-${oldDate}`), $lte: new Date(`${year}-${month}-${date}`) }
+      };
+    } else {
+      return {
+        timestamp: { $gte: new Date(fromDate), $lte: new Date(toDate) }
+      };
+    }
+  };
+  try {
+    const dateRangeQuery = getDateRangeQuery();
+    const logs = await NistLog.find(dateRangeQuery); // Apply the date filter here
+    response.json(logs);
+  } catch (error) {
+    response.status(500).json({ error: 'Error fetching logs from nistlogs collection' });
+  }
+};
+
+
+export const getSystemLogs = async (request, response) => {
+  const { fromDate, toDate } = request.body;
+
+  const getDateRangeQuery = () => {
+    if (!fromDate && !toDate) {
+      // Get the current date
+      const dateTime = new Date();
+      const year = dateTime.getFullYear();
+      const month = ("0" + (dateTime.getMonth() + 1)).slice(-2);
+      const date = ("0" + dateTime.getDate()).slice(-2);
+
+      // Go back by a duration (e.g., 1 month by default)
+      const duration = 1; // Example: 1 month duration
+      dateTime.setMonth(dateTime.getMonth() - duration);
+
+      const oldYear = dateTime.getFullYear();
+      const oldMonth = ("0" + (dateTime.getMonth() + 1)).slice(-2);
+      const oldDate = ("0" + dateTime.getDate()).slice(-2);
+
+      return {
+        timestamp: { $gte: new Date(`${oldYear}-${oldMonth}-${oldDate}`), $lte: new Date(`${year}-${month}-${date}`) }
+      };
+    } else {
+      return {
+        timestamp: { $gte: new Date(fromDate), $lte: new Date(toDate) }
+      };
+    }
+  };
+  try {
+    const dateRangeQuery = getDateRangeQuery();
+    const logs = await SystemLog.find(dateRangeQuery); // Fetch all logs from `nistlogs`
+    response.json(logs);
+} catch (error) {
+  response.status(500).json({ error: 'Error fetching logs from systemlogs collection' });
+}
+};
+
+export const getUserActivityLogs = async (request, response) => {
+  const { fromDate, toDate } = request.body;
+// console.log("ffff",fromDate,"enddd",toDate)
+  const getDateRangeQuery = () => {
+    if (!fromDate && !toDate) {
+      // Get the current date
+      const dateTime = new Date();
+      const year = dateTime.getFullYear();
+      const month = ("0" + (dateTime.getMonth() + 1)).slice(-2);
+      const date = ("0" + dateTime.getDate()).slice(-2);
+
+      // Go back by a duration (e.g., 1 month by default)
+      const duration = 1; // Example: 1 month duration
+      dateTime.setMonth(dateTime.getMonth() - duration);
+
+      const oldYear = dateTime.getFullYear();
+      const oldMonth = ("0" + (dateTime.getMonth() + 1)).slice(-2);
+      const oldDate = ("0" + dateTime.getDate()).slice(-2);
+
+      return {
+        timestamp: { $gte: new Date(`${oldYear}-${oldMonth}-${oldDate}`), $lte: new Date(`${year}-${month}-${date}`) }
+      };
+    } else {
+      return {
+        timestamp: { $gte: new Date(fromDate), $lte: new Date(toDate + "T23:59:59.999Z") }
+      };
+    }
+  };
+  try {
+    const dateRangeQuery = getDateRangeQuery();
+    const logs = await UserActivityLog.find(dateRangeQuery); // Fetch all logs from `nistlogs`
+    response.json(logs);
+} catch (error) {
+  response.status(500).json({ error: 'Error fetching logs from userActivitylogs collection' });
+}
+};
+
+export const getSchedulerLogs = async (request, response) => {
+  const { fromDate, toDate } = request.body;
+
+  const getDateRangeQuery = () => {
+    if (!fromDate && !toDate) {
+      // Get the current date
+      const dateTime = new Date();
+      const year = dateTime.getFullYear();
+      const month = ("0" + (dateTime.getMonth() + 1)).slice(-2);
+      const date = ("0" + dateTime.getDate()).slice(-2);
+
+      // Go back by a duration (e.g., 1 month by default)
+      const duration = 1; // Example: 1 month duration
+      dateTime.setMonth(dateTime.getMonth() - duration);
+
+      const oldYear = dateTime.getFullYear();
+      const oldMonth = ("0" + (dateTime.getMonth() + 1)).slice(-2);
+      const oldDate = ("0" + dateTime.getDate()).slice(-2);
+
+      return {
+        timestamp: { $gte: new Date(`${oldYear}-${oldMonth}-${oldDate}`), $lte: new Date(`${year}-${month}-${date}`) }
+      };
+    } else {
+      return {
+        timestamp: { $gte: new Date(fromDate), $lte: new Date(toDate) }
+      };
+    }
+  };
+  try {
+    const dateRangeQuery = getDateRangeQuery();
+    const logs = await SchedulerLog.find(dateRangeQuery); // Fetch all logs from `nistlogs`
+    response.json(logs);
+} catch (error) {
+  response.status(500).json({ error: 'Error fetching logs from schedulerlogs collection' });
+}
+};
+
 

@@ -9,7 +9,8 @@ const cveSchema = new mongoose.Schema({
     fix:String,
     seviarity:String,
     cveDetails:JSON,
-    fixLink:String  
+    fixLink:String ,
+    cvssScore:Number 
 });
 //cveSchema.plugin(mongoosePaginate);
 

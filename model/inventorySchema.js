@@ -13,7 +13,10 @@ const inventorySchema = new mongoose.Schema({
     firmwareVersion: String,
     status: String,
     vulnarabilities: Number,
-    projectId: String
+    projectId: String,
+    date: String,
+    year: String,
+    month: String
 });
 //inventorySchema.plugin(mongoosePaginate);
 

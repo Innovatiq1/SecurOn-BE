@@ -1,6 +1,7 @@
 import cveModel from '../model/cveSchema.js';
 import OemModel from '../model/oemSchema.js';
 import vendorProductCveModel from '../model/vendorProductCveSchema.js';
+import { systemLogger,userActivityLogger } from '../helpers/loggers.js';
 
 export const RunCveFixScheduler = async (req, res) => {
 
@@ -39,6 +40,7 @@ export const RunCveFixScheduler = async (req, res) => {
 
 
   } catch (error) {
+    systemLogger.error(error)
     console.log("error is" + error);
   }
 

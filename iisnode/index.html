@@ -1,0 +1,87 @@
+<html>
+<head>
+    <title>iisnode logs</title>
+    <style type="text/css">
+        body
+        {
+            font-family: "Trebuchet MS" , Arial, Helvetica, sans-serif;
+        }
+        table
+        {
+            border-collapse: collapse;
+        }
+        td, th
+        {
+            border: 1px solid lightgray;
+            padding: 3px 7px 2px 7px;
+        }
+        th
+        {
+            text-align: left;
+            padding-top: 5px;
+            padding-bottom: 4px;
+            background-color: Gray;
+            color: #ffffff;
+        }
+        td.stderr
+        {
+            color: Red;
+        }
+    </style>
+</head>
+<body>
+    <table id="logFilesTable">
+        <tr>
+            <th>
+                Computer name
+            </th>
+            <th>
+                PID
+            </th>
+            <th>
+                Type
+            </th>
+            <th>
+                Created
+            </th>
+            <th>
+                Link
+            </th>
+        </tr>
+    </table>
+    <p id="lastUpdated"></p>
+    <script type="text/javascript">
+
+        // this is replaced with actual data at runtime by code in interceptor.js
+        var logFiles = [{"file":"CVE_APP-105516-stderr-1716695261870.txt","computername":"CVE_APP","pid":105516,"type":"stderr","created":1716695261870},{"file":"CVE_APP-105516-stdout-1716695261863.txt","computername":"CVE_APP","pid":105516,"type":"stdout","created":1716695261863},{"file":"CVE_APP-105516-stdout-1716696455904.txt","computername":"CVE_APP","pid":105516,"type":"stdout","created":1716696455904},{"file":"CVE_APP-29240-stderr-1716970462271.txt","computername":"CVE_APP","pid":29240,"type":"stderr","created":1716970462271},{"file":"CVE_APP-29240-stdout-1716970462237.txt","computername":"CVE_APP","pid":29240,"type":"stdout","created":1716970462237},{"file":"CVE_APP-3868-stderr-1717033648278.txt","computername":"CVE_APP","pid":3868,"type":"stderr","created":1717033648278},{"file":"CVE_APP-3868-stdout-1717033648249.txt","computername":"CVE_APP","pid":3868,"type":"stdout","created":1717033648249},{"file":"CVE_APP-3868-stdout-1717034899245.txt","computername":"CVE_APP","pid":3868,"type":"stdout","created":1717034899245},{"file":"CVE_APP-41608-stderr-1717045552557.txt","computername":"CVE_APP","pid":41608,"type":"stderr","created":1717045552557},{"file":"CVE_APP-41608-stdout-1717045552543.txt","computername":"CVE_APP","pid":41608,"type":"stdout","created":1717045552543},{"file":"CVE_APP-49308-stderr-1716965826209.txt","computername":"CVE_APP","pid":49308,"type":"stderr","created":1716965826209},{"file":"CVE_APP-49308-stdout-1716965826201.txt","computername":"CVE_APP","pid":49308,"type":"stdout","created":1716965826201},{"file":"CVE_APP-49308-stdout-1716966435685.txt","computername":"CVE_APP","pid":49308,"type":"stdout","created":1716966435685},{"file":"CVE_APP-69736-stderr-1716875691678.txt","computername":"CVE_APP","pid":69736,"type":"stderr","created":1716875691678},{"file":"CVE_APP-69736-stdout-1716875691671.txt","computername":"CVE_APP","pid":69736,"type":"stdout","created":1716875691671},{"file":"CVE_APP-69736-stdout-1716876452493.txt","computername":"CVE_APP","pid":69736,"type":"stdout","created":1716876452493},{"file":"CVE_APP-79828-stderr-1717049974514.txt","computername":"CVE_APP","pid":79828,"type":"stderr","created":1717049974514},{"file":"CVE_APP-79828-stdout-1717049974503.txt","computername":"CVE_APP","pid":79828,"type":"stdout","created":1717049974503},{"file":"CVE_APP-85100-stderr-1716974232646.txt","computername":"CVE_APP","pid":85100,"type":"stderr","created":1716974232646},{"file":"CVE_APP-85100-stdout-1716974232643.txt","computername":"CVE_APP","pid":85100,"type":"stdout","created":1716974232643},{"file":"CVE_APP-89384-stderr-1717035383669.txt","computername":"CVE_APP","pid":89384,"type":"stderr","created":1717035383669},{"file":"CVE_APP-89384-stdout-1717035383664.txt","computername":"CVE_APP","pid":89384,"type":"stdout","created":1717035383664}];
+        var lastUpdated = 1717049976137;
+        var date = new Date();
+
+        date.setTime(lastUpdated);
+        document.getElementById('lastUpdated').innerHTML = 'Index was last updated ' + date;
+
+        logFiles.sort(function (a, b) {
+            return b.created - a.created;
+        });
+
+        var logFilesTable = document.getElementById("logFilesTable");
+        for (var i = 0; i < logFiles.length; i++) {
+            var logFile = logFiles[i];
+            date.setTime(logFile.created);
+            var row = logFilesTable.insertRow(-1);
+            var computerNameCell = row.insertCell(0);
+            var pidCell = row.insertCell(1);
+            var typeCell = row.insertCell(2);
+            var dateCell = row.insertCell(3);
+            var logCell = row.insertCell(4);
+            computerNameCell.innerHTML = logFile.computername;
+            pidCell.innerHTML = logFile.pid.toString();
+            typeCell.innerHTML = logFile.type;
+            typeCell.setAttribute('class', logFile.type);
+            dateCell.innerHTML = date.toString();
+            logCell.innerHTML = '<a href="' + logFile.file + '">log</a>';
+        };
+
+    </script>
+</body>
+</html>

@@ -24,14 +24,28 @@ dotenv.config();
 
 const app = express();
 
-cron.schedule(`58 23 * * *`, RunCveScheduler);
+// CORS Configuration
+const corsOptions = {
+    origin: ['https://cve.innovsectraker.com', 'http://localhost:4200'],
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'authtoken', 'Accept', 'Origin', 'X-Requested-With'],
+    exposedHeaders: ['Content-Range', 'X-Content-Range'],
+    credentials: true,
+    optionsSuccessStatus: 200
+};
+
+// Apply CORS configuration before other middleware
+app.use(cors(corsOptions));
+
+// cron.schedule('*/55 * * * *', RunCveScheduler);
 //cron.schedule(`58 23 * * *`, RunCveFixScheduler);
-cron.schedule(`0 0 */2 * * *`, RunAssetCveMappingScheduler);
+// cron.schedule('0 11 * * *', RunAssetCveMappingScheduler); 
 
 //cron.schedule(`01 0 * * *`, runOemProductsScheduler);
 
 // cron.schedule(`01 02 * * *`, RunCveMappingScheduler);
-cron.schedule(`0 0 */1 * * *`, RunAssetProductCveMappingScheduler);
+// cron.schedule('*/5 * * * *', RunAssetProductCveMappingScheduler);
+// cron.schedule('0 * * * *', RunAssetProductCveMappingScheduler);
 
 //cron.schedule(`0 0 */2 * * *`, runlastModifiedScheduler);
 //cron.schedule(`0 0 */2 * * *`, runlastPublishedScheduler);
@@ -50,5 +64,4 @@ app.listen(PORT, () => console.log(`Server is running successfully on PORT ${POR
 
 app.use(bodyParser.json({ extended: true }));
 app.use(bodyParser.urlencoded({ extended: true }));
-app.use(cors());
 app.use('/', Routes);

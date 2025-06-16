@@ -18,8 +18,16 @@ const vendorProductCveSchema = new mongoose.Schema({
     version:String,
     serialNo:String,
     osType:String,
-    project:String,
     type: String,
+    project:String,
+    advisoryTitle:String,
+    vulnerableComponent:String,
+    vulnerableFeature:String,
+    workarounds:String,
+    fixedRelease:String,
+    impactRate:String,
+    cvssScore:String,
+    advisoryUrl:String
 });
 vendorProductCveSchema.plugin(mongoosePaginate);
 
