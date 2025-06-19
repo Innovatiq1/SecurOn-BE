@@ -26,7 +26,7 @@ import { getOemVendorList, getProductsByVendor, searchCriteria, getCveDetails, g
 import { getCvesByDateRange, getCvesCountByDateRange, getCveDataBySeviarity, getCircularDashboardData, getVulnarabilityTrendData, getCveDataByBrand, getCveDataByAsset, getCveDataByProject,getCveDataCountByProject,getAllVendors } from '../controller/cvedashboard-controller.js';
 import { getNistLogs,getSystemLogs, getUserActivityLogs ,getSchedulerLogs} from '../controller/logs-controller.js';
 import { runTopAffectedProductsBrandsScheduler,getAffectedProducts,getTopAffectedProducts } from '../controller/affected-products-brands-controller.js';
-import { saveScanType, getAllScanTypes, updateScanType, deleteScanType, filterScanType } from '../controller/scan-type-controller.js';
+import { saveScanType, getAllScanTypes, updateScanType, deleteScanType, filterScanType, getVendorProductCveData } from '../controller/scan-type-controller.js';
 
 const router = express.Router();
 
@@ -123,6 +123,7 @@ router.get('/getAllScanTypes', getAllScanTypes);
 router.put('/updateScanType/:id', updateScanType);
 router.delete('/deleteScanType/:id', deleteScanType);
 router.post('/filterScanType', filterScanType);
+router.post('/getVendorProductCveData', getVendorProductCveData);
 
 export default router;
 

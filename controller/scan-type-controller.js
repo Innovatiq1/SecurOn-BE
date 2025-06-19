@@ -1,8 +1,10 @@
 import ScanType from '../model/scanTypeSchema.js';
+import vendorProductCve from '../model/vendorProductCveSchema.js';
 
 export const saveScanType = async (request, response) => {
   try {
     const scanTypeData = request.body;
+    console.log(scanTypeData);
     const newScanType = new ScanType(scanTypeData);
     await newScanType.save();
     response.status(201).json({ message: 'ScanType saved successfully', data: newScanType });
@@ -57,5 +59,37 @@ export const filterScanType = async (request, response) => {
     response.status(200).json(filtered);
   } catch (error) {
     response.status(500).json({ message: 'Error filtering ScanType', error });
+  }
+};
+
+export const getVendorProductCveData = async (request, response) => {
+  try {
+    const { vendorName, partNo, osType, version } = request.body;
+    const query = {};
+    
+    // Build query with proper validation
+    if (vendorName && Array.isArray(vendorName) && vendorName.length > 0) {
+      query.vendorName = { $in: vendorName };
+    }
+    if (partNo && Array.isArray(partNo) && partNo.length > 0) {
+      query.partNo = { $in: partNo };
+    }
+    if (osType && Array.isArray(osType) && osType.length > 0) {
+      query.osType = { $in: osType };
+    }
+    if (version && Array.isArray(version) && version.length > 0) {
+      query.version = { $in: version };
+    }
+
+    // Use lean() for better performance and select only needed fields
+    // Remove skip and limit since we need all data
+    const data = await vendorProductCve
+      .find(query)
+      .select('vendorName partNo osType version cveId seviarity cvssScore date')
+      .lean();
+
+    response.status(200).json(data);
+  } catch (error) {
+    response.status(500).json({ message: 'Error fetching vendor product CVE data', error });
   }
 }; 

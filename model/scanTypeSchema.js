@@ -2,16 +2,16 @@ import mongoose from 'mongoose';
 
 const scanTypeSchema = new mongoose.Schema({
   brand: [String],
-  cvssScore: [String],
   firmware: [String],
   osType: [String],
   partNo: [String],
   project: [String],
   scanType: mongoose.Schema.Types.Mixed, 
   serialNo: [String],
-  severityType: [String],
   type: [String],
-  status: String
+  status: String,
+  scheduler_hours: String,
+  cveId: [String],
 }, {
   timestamps: { createdAt: 'createdAt', updatedAt: false }
 });
